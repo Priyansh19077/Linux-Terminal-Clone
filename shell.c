@@ -4,6 +4,7 @@
 #include<unistd.h>
 #include <dirent.h> 
 char *current_directory;
+char *initial_directory;
 int initial_size;
 int position;
 FILE *history_write;
@@ -33,7 +34,10 @@ char *take_input()
 }
 void print_history1()
 {
-	history_read=fopen("history.txt","r");
+	char *path=malloc(1000*sizeof(char));
+	strcpy(path,initial_directory);
+	strcat(path,"/history.txt");
+	history_read=fopen(path,"r");
 	char *history1=malloc(1000*sizeof(char));
 	int count=1;
 	while(fgets(history1,1000,history_read)!=NULL)
@@ -47,14 +51,17 @@ int handle_internal_command(char *command, char *flag, char *args)
 	// printf("%s\n",command);
 	// printf("%s\n",flag);
 	// printf("%s\n",args);
-	if((!strcmp(command,"exit")) && (!strcmp(flag,"")) && (!strcmp(args,""))) //exit command
+	if((!strcmp(command,"exit"))) //exit command
 		return 10;
 	if(!strcmp(command,"history")) //history command
 	{
 		if((!strcmp(flag,"-c")) && (!strcmp(args,""))) // clear all history
 		{
 			printf("%s\n","Cleared History!");
-			history_write=fopen("history.txt","w");
+			char *path=malloc(1000*sizeof(char));
+			strcpy(path,initial_directory);
+			strcat(path,"/history.txt");
+			history_write=fopen(path,"w");
 			fputs("",history_write);
 			return 1;
 		}
@@ -76,11 +83,11 @@ int handle_internal_command(char *command, char *flag, char *args)
 			printf("%s",args);
 			return 1;
 		}
-		if(!strcmp(flag,"-E"))  //defualt implementaion
-		{
-			printf("%s\n",args);
-			return 1;
-		}
+		// if(!strcmp(flag,"-E"))  //defualt implementaion
+		// {
+		// 	printf("%s\n",args);
+		// 	return 1;
+		// }
 		if(!strcmp(flag,""))
 		{
 			printf("%s\n",args);
@@ -94,7 +101,7 @@ int handle_internal_command(char *command, char *flag, char *args)
 			return 1;
 		else
 		{
-			printf("%s\n","There was an error: No such directory!!!");
+			printf("%s\n","There was an error: ");
 			return 1;
 		}
 	}
@@ -102,19 +109,87 @@ int handle_internal_command(char *command, char *flag, char *args)
 }
 int handle_external_command(char *command,char *flag, char *args)
 {
-	if(!strcmp(command,"ls") && !strcmp(flag,"") && !strcmp(args,""))
+	if(!strcmp(command,"ls"))   // ls command completed
 	{
-		struct dirent *de;   
-    	DIR *dr = opendir(current_directory); 
-    	if (dr == NULL)  
-    	{ 
-        	printf("Could not open current directory" ); 
-       	 return 0; 
-    	}  
-    	while ((de = readdir(dr)) != NULL) 
-            printf("%s\n", de->d_name); 
-    	closedir(dr);     
-	 	return 1;
+		if(!strcmp(flag,"") || !strcmp(flag,"-l") || !strcmp(flag,"-A"))
+		{
+			if(strcmp(args,""))
+				return -1;
+			printf("%s\n",initial_directory);
+			char *path=malloc(1000*sizeof(char));
+			strcpy(path,initial_directory);
+			strcat(path,"/ls");
+			// printf("%s\n",path);
+			pid_t ret_value=fork();
+			int status;
+			if(ret_value<0)
+			{
+				printf("Child proces could not be created");
+			}
+			else if(ret_value==0)
+			{
+				//child process
+				execl(path,flag,NULL);
+			}
+			else
+			{
+				//parent process
+				waitpid(ret_value,&status,0);
+				return 1;
+			}
+		}
+	}
+	if(!strcmp(command,"mkdir"))
+	{
+		if((!strcmp(flag,"") || !strcmp(flag,"-p")) && (strcmp(args,"")))
+		{
+			char *path=malloc(1000*sizeof(char));
+			strcpy(path,initial_directory);
+			strcat(path,"/mkdir");
+			pid_t ret_value=fork();
+			int status;
+			if(ret_value<0)
+			{
+				printf("Child proces could not be created");
+			}
+			else if(ret_value==0)
+			{
+				//child process
+				execl(path,flag,args,NULL);
+			}
+			else
+			{
+				//parent process
+				waitpid(ret_value,&status,0);
+				return 1;
+			}
+		}
+	}
+	if(!strcmp(command,"cat"))
+	{
+		if(!strcmp(flag,"") || !strcmp(flag,"-E") || !strcmp(flag,"-n"))
+		{
+			char *path=malloc(1000*sizeof(char));
+			strcpy(path,initial_directory);
+			strcat(path,"/cat");
+			pid_t ret_value=fork();
+			int status;
+			if(ret_value<0)
+			{
+				printf("Child proces could not be created");
+			}
+			else if(ret_value==0)
+			{
+				//child process
+				execl(path,flag,args,NULL);
+			}
+			else
+			{
+				//parent process
+				waitpid(ret_value,&status,0);
+				return 1;
+			}
+		}
 	}
 	return -1;
 }
@@ -150,10 +225,10 @@ int execute_command(char *command)
 	(*ptr)++;
 	// printf("%d\n",(*ptr));
 	char *flag=read_command_from(ptr,n,command);
-		char *string=malloc(1000*sizeof(char));
-			int actual_position=0;
+	char *string=malloc(1000*sizeof(char));
+	int actual_position=0;
 	int counter=0;
-	if(strlen(flag)>2 || flag[0]!='-')
+	if(strlen(flag)!=2 || flag[0]!='-')
 	{
 		string=flag;
 		actual_position=strlen(flag);
@@ -187,6 +262,8 @@ int main()
 {
 	initial_size=100;
 	current_directory=malloc(100*sizeof(char));
+	initial_directory=malloc(1000*sizeof(char));
+	getcwd(initial_directory,1000);
 	char *input_line;
 	int executed_correctly=1;
 	position=0;
@@ -198,13 +275,16 @@ int main()
 		// printf("%s\n",input_line);
 		if(strcmp(input_line,"")==0)
 		{
-			printf("%s\n","Did not enter a command" );
+			// printf("%s\n","Did not enter a command" );
 			free(input_line);
 			continue;
 		}
 		executed_correctly= execute_command(input_line);
 		// printf("%d\n",executed_correctly );
-		history_write=fopen("history.txt","a");
+		char *path=malloc(1000*sizeof(char));
+		strcpy(path,initial_directory);
+		strcat(path,"/history.txt");
+		history_write=fopen(path,"a");
 		fputs(input_line,history_write);
 		fputs("\n",history_write);
 		fclose(history_write);
