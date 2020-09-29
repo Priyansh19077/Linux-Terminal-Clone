@@ -191,11 +191,34 @@ int handle_external_command(char *command,char *flag, char *args)
 			}
 		}
 	}
-	if(!strcmp(command,"date"))
+	if(!strcmp(command,"date") && ((!strcmp(flag,"") || !strcmp(flag,"-R") || !strcmp(flag,"-u"))))
 	{
 		char *path=malloc(1000*sizeof(char));
 		strcpy(path,initial_directory);
 		strcat(path,"/date");
+		pid_t ret_value=fork();
+		int status;
+		if(ret_value<0)
+		{
+			printf("Child proces could not be created");
+		}
+		else if(ret_value==0)
+		{
+			//child process
+			execl(path,flag,args,NULL);
+		}
+		else
+		{
+			//parent process
+			waitpid(ret_value,&status,0);
+			return 1;
+		}
+	}
+	if(!strcmp(command,"rm") && ((!strcmp(flag,"") || !strcmp(flag,"-i") || !strcmp(flag,"-v"))))
+	{
+		char *path=malloc(1000*sizeof(char));
+		strcpy(path,initial_directory);
+		strcat(path,"/rm");
 		pid_t ret_value=fork();
 		int status;
 		if(ret_value<0)
