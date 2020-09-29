@@ -2,19 +2,36 @@
 #include <time.h>
 #include<string.h>
 int main(int a, char**args) {
-    time_t t = time(NULL);
-    struct tm *tm = localtime(&t);
-    if(!strcmp(args[0],""))
-    {
-       printf("%s\t","local time");
- 	   printf("%s", asctime(tm));
+
+	if(!strcmp(args[0],""))
+	{
+		time_t time1;
+	  	struct tm *information;
+	    char string[80];
+	    time( &time1 );
+	    information = localtime( &time1 );
+	    strftime(string,80,"%a %b %d %H:%M:%S %Z %Y", information);
+	    printf("%s\n", string);
 	}
 	if(!strcmp(args[0],"-u"))
 	{
-    	struct tm *ptm = gmtime ( &t ); // Find out UTC time
-		time_t utctime = mktime(ptm); // Get UTC time as time_t
-		printf("%s\t","UTC time");
-		printf("%s",ctime(&utctime));
+		time_t time1;
+	  	struct tm *information;
+	    char string[80];
+	    time( &time1 );
+	    information = gmtime( &time1 );
+	    strftime(string,80,"%a %b %d %H:%M:%S UTC %Y", information);
+	    printf("%s\n", string);	
+	}
+	if(!strcmp(args[0],"-R"))
+	{
+		time_t time1;
+	  	struct tm *information;
+	    char string[80];
+	    time( &time1 );
+	    information = localtime( &time1 );
+	    strftime(string,80,"%a, %b %d %H:%M:%S %z", information);
+	    printf("%s\n", string);	
 	}
     return 0;
 }
