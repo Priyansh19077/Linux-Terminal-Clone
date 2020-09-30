@@ -6,6 +6,8 @@
 #include<sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include<errno.h>
+extern int errno;
 void trim_the_name(char *args)
 {
     int n = strlen(args);
@@ -21,7 +23,9 @@ int main(int a, char**args) {
     {
         int status = mkdir(args[1], 0777);
         if (status)
-            printf("Some Error occured in directory creation\n");
+        {
+            printf("Error: %s\n", strerror(errno));
+        }
     }
     if (!strcmp(args[0], "-v"))
     {
@@ -29,7 +33,7 @@ int main(int a, char**args) {
         if (!status)
             printf("%s\n", "Created directory successfully");
         else
-            printf("Some Error occured in directory creation\n");
+            printf("Error: %s\n", strerror(errno));
     }
     // printf("%s\n",args[1]);
     if (!strcmp(args[0], "-p"))
@@ -85,7 +89,7 @@ int main(int a, char**args) {
                 }
                 else
                 {
-                    printf("%s\n", "Error occured in creating the directory");
+                    printf("Error: %s\n", strerror(errno));
                 }
             }
         }

@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<unistd.h>
+#include <errno.h>
 #include<dirent.h>
 #include<sys/wait.h>
 #include <sys/types.h>
@@ -14,6 +15,7 @@
 #include <string.h>
 char *initial_directory;
 FILE *history_read;
+extern int errno ;
 int count = 1;
 void print(char *file_name, int flag) {
     char *path = malloc(1000 * sizeof(char));
@@ -25,7 +27,7 @@ void print(char *file_name, int flag) {
     history_read = fopen(path, "r");
     // printf("%s\n",path);
     if (history_read == NULL) {
-        printf("%s is NOT a valid readable file\n", file_name);
+        printf("Error in opening this file: %s\n", strerror(errno));
         return;
     }
     char *history1 = malloc(1000 * sizeof(char));

@@ -6,12 +6,14 @@
 #include<sys/wait.h>
 #include<sys/stat.h>
 #include<time.h>
+#include<errno.h>
+extern int errno;
 int main(int a, char**args) {
     struct dirent *de;
     DIR *dr = opendir(".");
     if (dr == NULL)
     {
-        printf("Could not open current directory" );
+        printf("Error: %s\n", strerror(errno));
         return 0;
     }
     while ((de = readdir(dr)) != NULL)

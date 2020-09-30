@@ -1,0 +1,66 @@
+history -c
+rm history
+rm history.txt
+rm cat
+ls
+exit
+cat adsf.txt
+exit
+rm asdftx
+asdfjkl
+exit
+cat s.txt
+mkdir Pri
+exit
+cat Pri/a1.txt
+cd Pri
+exit
+mkdir Pri
+cd Pri
+exit
+cd Pri
+exit
+mkdir Pr
+mkdir Pr
+exit
+cd asdf
+cd ..
+cd adsf
+cd adf
+cd asdf
+exit
+cd ..
+exit
+cd ..
+cd adsf
+cd asdf
+pwed
+pw
+pwd
+cd ..
+pwd
+cd ..
+pwd
+exit
+pwd
+cd asdf
+cd ..
+ cd asdf
+pwd
+exit
+asdf
+ls -asdf
+ls -123
+ls
+ls -a asdf
+exit
+ls -asdf
+ls -a
+ls -A
+mkdir P
+mkdir -v P
+mkdir -p P/p
+ls
+cd P
+ls
+ls -l
